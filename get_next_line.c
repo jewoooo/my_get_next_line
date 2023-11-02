@@ -6,110 +6,113 @@
 /*   By: jewoolee <jewoolee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:29:11 by jewoolee          #+#    #+#             */
-/*   Updated: 2023/10/30 22:15:41 by jewoolee         ###   ########.fr       */
+/*   Updated: 2023/11/02 21:36:56 by jewoolee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#define BUFF_SIZE 1
 
-static size_t	gnl_check_nl(char *s)
+static char	*free_all(char *s1, char *s2)
 {
-	size_t	i;
-
-	i = 0;
-	while (s[i] != 0)
+	if (s1 != NULL)
 	{
-		if (s[i] == '\n')
-			return (1);
-		i++;
+		free(s1);
+		s1 = NULL;
 	}
-	return (0);
+	if (s2 != NULL)
+		free(s2);
+	return (NULL);
 }
 
-static char	*gnl_free(char *s, char **ptr)
+static char	*eof_line(char *s1, char *s2)
 {
-	if (s != 0)
+	char	*line;
+
+	line = gnl_strdup(s1);
+	if (line == NULL)
+		return (free_all(s1, s2));
+	s1 = free_all(s1, s2);
+	return (line);
+}
+
+static char	*backup_line(char *s, size_t from)
+{
+	size_t	i;
+	size_t	last;
+	size_t	size;
+	char	*backup;
+
+	last = gnl_strlen(s) + 1;
+	size = last - from;
+	backup = (char *)malloc(sizeof(char) * (size + 1));
+	if (backup == NULL)
 	{
 		free(s);
-		s = 0;
+		return (NULL);
 	}
-	if (*ptr != 0)
+	i = 0;
+	while (i < size)
 	{
-		free(*ptr);
-		*ptr = 0;
+		backup[i] = s[from + i];
+		i++;
 	}
-	return (0);
+	backup[i] = '\0';
+	free(s);
+	return (backup);
 }
 
-static char	*gnl_a_line(char *s, char **ptr)
+static char	*a_line(char *s)
 {
-	size_t	size;
+	char	*line;
 	size_t	i;
-	char	*str;
+	size_t	size;
 
 	size = 0;
 	while (s[size] != '\n')
 		size++;
-	str = (char *)malloc(sizeof(char) * (size + 1));
-	if (str == 0)
-		return (gnl_free(s, ptr));
-	i = 0;
-	while (*s != '\n')
+	line = (char *)malloc(sizeof(char) * (size + 2));
+	if (line == NULL)
 	{
-		str[i] = *s;
-		i++;
-		s++;
+		free(s);
+		s = NULL;
+		return (NULL);
 	}
-	str[i] = *s;
-	s++;
-	free(*ptr);
-	*ptr = 0;
-	return (str);
-}
-
-static char	*gnl_eof(char *s, char **ptr)
-{
-	char	*str;
-
-	if (s == 0)
-		return (0);
-	str = gnl_strdup(s);
-	if (str == 0)
-		return (gnl_free(s, ptr));
-	while (*s != '\0')
-		s++;
-	free(s);
-	s = 0;
-	free(*ptr);
-	*ptr = 0;
-	return (str);
+	i = 0;
+	while (i <= size)
+	{
+		line[i] = s[i];
+		i++;
+	}
+	line[i] = '\0';
+	s = backup_line(s, size + 1);
+	if (s == NULL)
+		return (NULL);
+	return (line);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*line;
+	static char	*rd_line;
 	char		*buff;
-	char		*res;
 	ssize_t		rd_size;
 
 	if (fd < 0 || BUFF_SIZE < 1)
-		return (0);
-	while (line == 0 || gnl_check_nl(line) == 0)
+		return (NULL);
+	while (rd_line == NULL || gnl_strchr(rd_line, '\n') == NULL)
 	{
 		buff = (char *)malloc(sizeof(char) * (BUFF_SIZE + 1));
-		if (buff == 0)
-			return (gnl_free(line, &buff));
+		if (buff == NULL)
+			return (free_all(rd_line, buff));
 		rd_size = read(fd, (void *)buff, BUFF_SIZE);
 		if (rd_size < 0)
-			return (gnl_free(line, &buff));
+			return (free_all(rd_line, buff));
 		if (rd_size == 0)
-			return (gnl_eof(line, &buff));
+			return (eof_line(rd_line, buff));
 		buff[rd_size] = '\0';
-		line = gnl_strjoin(line, buff);
-		if (line == 0)
-			return (gnl_free(line, &buff));
+		rd_line = gnl_strjoin(rd_line, buff);
+		if (rd_line == NULL)
+			return (free_all(rd_line, buff));
+		free(buff);
 	}
-	res = gnl_a_line(line, &buff);
-	return (res);
+	return (a_line(rd_line));
 }
