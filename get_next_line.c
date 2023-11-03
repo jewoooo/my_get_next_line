@@ -6,46 +6,46 @@
 /*   By: jewoolee <jewoolee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:29:11 by jewoolee          #+#    #+#             */
-/*   Updated: 2023/11/03 00:46:05 by jewoolee         ###   ########.fr       */
+/*   Updated: 2023/11/03 14:16:24 by jewoolee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static char	*free_all(char *s1, char *s2)
+static char	*free_all(char **ptr, char *s)
 {
-	if (s1 != NULL)
+	if (*ptr != NULL)
 	{
-		free(s1);
-		s1 = NULL;
+		free(*ptr);
+		*ptr = NULL;
 	}
-	if (s2 != NULL)
-		free(s2);
+	if (s != NULL)
+		free(s);
 	return (NULL);
 }
 
-static char	*eof_line(char **ptr, char *s2)
+static char	*eof_line(char **ptr, char *s)
 {
 	char	*line;
 
+	free(s);
 	if (*ptr == NULL)
 		return (NULL);
 	line = gnl_strdup(*ptr);
+	free(*ptr);
+	*ptr = NULL;
 	if (line == NULL)
-		return (free_all(*ptr, s2));
-	*ptr = free_all(*ptr, s2);
+		return (NULL);
 	return (line);
 }
 
 static char	*backup_line(char **s, size_t from)
 {
 	size_t	i;
-	size_t	last;
 	size_t	size;
 	char	*backup;
 
-	last = gnl_strlen(*s) + 1;
-	size = last - from;
+	size = gnl_strlen(*s) - from;
 	backup = (char *)malloc(sizeof(char) * (size + 1));
 	if (backup == NULL)
 	{
@@ -53,7 +53,7 @@ static char	*backup_line(char **s, size_t from)
 		return (NULL);
 	}
 	i = 0;
-	while (i < size)
+	while (i <= size)
 	{
 		backup[i] = (*s)[from + i];
 		i++;
@@ -64,11 +64,11 @@ static char	*backup_line(char **s, size_t from)
 	return (backup);
 }
 
-static char	*a_line(char **s)
+static char	*get_a_line(char **s)
 {
-	char	*line;
 	size_t	i;
 	size_t	size;
+	char	*line;
 
 	size = 0;
 	while ((*s)[size] != '\n')
@@ -101,21 +101,21 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFF_SIZE < 1)
 		return (NULL);
-	while (rd_line == NULL || gnl_strchr(rd_line, '\n') == NULL)
+	while (gnl_strnl(rd_line) == 0)
 	{
 		buff = (char *)malloc(sizeof(char) * (BUFF_SIZE + 1));
 		if (buff == NULL)
-			return (free_all(rd_line, buff));
+			return (free_all(&rd_line, buff));
 		rd_size = read(fd, (void *)buff, BUFF_SIZE);
 		if (rd_size < 0)
-			return (free_all(rd_line, buff));
+			return (free_all(&rd_line, buff));
 		if (rd_size == 0)
 			return (eof_line(&rd_line, buff));
 		buff[rd_size] = '\0';
 		rd_line = gnl_strjoin(rd_line, buff);
 		if (rd_line == NULL)
+			return (free_all(&rd_line, buff));
 		free(buff);
 	}
-	buff = NULL;
-	return (a_line(&rd_line));
+	return (get_a_line(&rd_line));
 }

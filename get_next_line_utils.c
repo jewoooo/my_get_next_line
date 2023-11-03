@@ -6,24 +6,26 @@
 /*   By: jewoolee <jewoolee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:29:14 by jewoolee          #+#    #+#             */
-/*   Updated: 2023/11/03 00:33:07 by jewoolee         ###   ########.fr       */
+/*   Updated: 2023/11/03 14:39:30 by jewoolee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*gnl_strchr(char *s, char c)
+size_t	gnl_strnl(char *s)
 {
 	size_t	i;
 
+	if (s == NULL)
+		return (0);
 	i = 0;
 	while (s[i] != '\0')
 	{
-		if (s[i] == c)
-			return (s + i);
+		if (s[i] == '\n')
+			return (1);
 		i++;
 	}
-	return (NULL);
+	return (0);
 }
 
 size_t	gnl_strlen(char *s)
@@ -84,13 +86,13 @@ char	*gnl_strjoin(char *s1, char *s2)
 	if (join_s == NULL)
 		return (NULL);
 	join_s = gnl_strncpy(join_s, s1, s1_len);
+	free(s1);
 	i = 0;
 	while (i < s2_len)
 	{
 		join_s[s1_len + i] = s2[i];
 		i++;
 	}
-	join_s[i] = '\0';
-	free(s1);
+	join_s[s1_len + i] = '\0';
 	return (join_s);
 }
