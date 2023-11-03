@@ -6,7 +6,7 @@
 /*   By: jewoolee <jewoolee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:29:11 by jewoolee          #+#    #+#             */
-/*   Updated: 2023/11/03 14:16:24 by jewoolee         ###   ########.fr       */
+/*   Updated: 2023/11/03 15:17:25 by jewoolee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,14 +99,14 @@ char	*get_next_line(int fd)
 	char		*buff;
 	ssize_t		rd_size;
 
-	if (fd < 0 || BUFF_SIZE < 1)
+	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
 	while (gnl_strnl(rd_line) == 0)
 	{
-		buff = (char *)malloc(sizeof(char) * (BUFF_SIZE + 1));
+		buff = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 		if (buff == NULL)
 			return (free_all(&rd_line, buff));
-		rd_size = read(fd, (void *)buff, BUFF_SIZE);
+		rd_size = read(fd, (void *)buff, BUFFER_SIZE);
 		if (rd_size < 0)
 			return (free_all(&rd_line, buff));
 		if (rd_size == 0)

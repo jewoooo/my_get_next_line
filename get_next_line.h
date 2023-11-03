@@ -6,7 +6,7 @@
 /*   By: jewoolee <jewoolee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:29:08 by jewoolee          #+#    #+#             */
-/*   Updated: 2023/11/03 14:45:19 by jewoolee         ###   ########.fr       */
+/*   Updated: 2023/11/03 15:27:34 by jewoolee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 # include <stdlib.h>
 # include <unistd.h>
 
-# ifndef BUFF_SIZE
-#  define BUFF_SIZE 1000000
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 1
 # endif
 
 char	*get_next_line(int fd);
