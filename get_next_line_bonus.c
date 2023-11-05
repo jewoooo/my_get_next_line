@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jewoolee <jewoolee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:29:11 by jewoolee          #+#    #+#             */
-/*   Updated: 2023/11/03 18:37:30 by jewoolee         ###   ########.fr       */
+/*   Updated: 2023/11/05 21:22:52 by jewoolee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 static char	*free_all(char **ptr, char *s)
 {
@@ -91,27 +91,27 @@ static char	*get_a_line(char **s)
 
 char	*get_next_line(int fd)
 {
-	static char	*rd_line;
+	static char	*rd_line[OPEN_MAX];
 	char		*buff;
 	ssize_t		rd_size;
 
 	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
-	while (gnl_strnl(rd_line) == 0)
+	while (gnl_strnl(rd_line[fd]) == 0)
 	{
 		buff = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 		if (buff == NULL)
-			return (free_all(&rd_line, buff));
+			return (free_all(&rd_line[fd], buff));
 		rd_size = read(fd, (void *)buff, BUFFER_SIZE);
 		if (rd_size < 0)
-			return (free_all(&rd_line, buff));
+			return (free_all(&rd_line[fd], buff));
 		if (rd_size == 0)
-			return (eof_line(&rd_line, buff));
+			return (eof_line(&rd_line[fd], buff));
 		buff[rd_size] = '\0';
-		rd_line = gnl_strjoin(rd_line, buff);
-		if (rd_line == NULL)
-			return (free_all(&rd_line, buff));
+		rd_line[fd] = gnl_strjoin(rd_line[fd], buff);
+		if (rd_line[fd] == NULL)
+			return (free_all(&rd_line[fd], buff));
 		free(buff);
 	}
-	return (get_a_line(&rd_line));
+	return (get_a_line(&rd_line[fd]));
 }
