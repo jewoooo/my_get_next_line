@@ -6,13 +6,13 @@
 /*   By: jewoolee <jewoolee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:29:11 by jewoolee          #+#    #+#             */
-/*   Updated: 2023/11/05 21:22:52 by jewoolee         ###   ########.fr       */
+/*   Updated: 2023/11/14 23:33:21 by jewoolee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
 
-static char	*free_all(char **ptr, char *s)
+static char	*free_error(char **ptr, char *s)
 {
 	if (*ptr != NULL)
 	{
@@ -39,53 +39,53 @@ static char	*eof_line(char **ptr, char *s)
 	return (line);
 }
 
-static char	*backup_line(char **s, size_t from)
+static char	*backup_line(char **ptr, size_t from)
 {
 	size_t	i;
 	size_t	size;
 	char	*backup;
 
-	size = gnl_strlen(*s) - from;
+	size = gnl_strlen(*ptr) - from;
 	if (size < 1)
 	{
-		free(*s);
+		free(*ptr);
 		return (NULL);
 	}
 	backup = (char *)malloc(sizeof(char) * (size + 1));
 	if (backup == NULL)
 	{
-		free(*s);
+		free(*ptr);
 		return (NULL);
 	}
 	i = 0;
 	while (i < size)
 	{
-		backup[i] = (*s)[from + i];
+		backup[i] = (*ptr)[from + i];
 		i++;
 	}
 	backup[i] = '\0';
-	free(*s);
+	free(*ptr);
 	return (backup);
 }
 
-static char	*get_a_line(char **s)
+static char	*get_a_line(char **ptr)
 {
 	size_t	size;
 	char	*line;
 
 	size = 0;
-	while ((*s)[size] != '\n')
+	while ((*ptr)[size] != '\n')
 		size++;
 	line = (char *)malloc(sizeof(char) * (size + 2));
 	if (line == NULL)
 	{
-		free(*s);
-		*s = NULL;
+		free(*ptr);
+		*ptr = NULL;
 		return (NULL);
 	}
-	line = gnl_strncpy(line, *s, size + 1);
+	line = gnl_strncpy(line, *ptr, size + 1);
 	line[size + 1] = '\0';
-	*s = backup_line(s, size + 1);
+	*ptr = backup_line(ptr, size + 1);
 	return (line);
 }
 
@@ -101,16 +101,16 @@ char	*get_next_line(int fd)
 	{
 		buff = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 		if (buff == NULL)
-			return (free_all(&rd_line[fd], buff));
+			return (free_error(&rd_line[fd], buff));
 		rd_size = read(fd, (void *)buff, BUFFER_SIZE);
 		if (rd_size < 0)
-			return (free_all(&rd_line[fd], buff));
+			return (free_error(&rd_line[fd], buff));
 		if (rd_size == 0)
 			return (eof_line(&rd_line[fd], buff));
 		buff[rd_size] = '\0';
 		rd_line[fd] = gnl_strjoin(rd_line[fd], buff);
 		if (rd_line[fd] == NULL)
-			return (free_all(&rd_line[fd], buff));
+			return (free_error(&rd_line[fd], buff));
 		free(buff);
 	}
 	return (get_a_line(&rd_line[fd]));
