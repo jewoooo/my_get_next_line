@@ -6,7 +6,7 @@
 /*   By: jewoolee <jewoolee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:29:14 by jewoolee          #+#    #+#             */
-/*   Updated: 2023/11/05 21:22:28 by jewoolee         ###   ########.fr       */
+/*   Updated: 2023/11/18 00:10:38 by jewoolee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,10 @@ char	*gnl_strjoin(char *s1, char *s2)
 	s2_len = gnl_strlen(s2);
 	join_s = (char *)malloc(sizeof(char) * (s1_len + s2_len + 1));
 	if (join_s == NULL)
+	{
+		free(s1);
 		return (NULL);
+	}
 	join_s = gnl_strncpy(join_s, s1, s1_len);
 	free(s1);
 	i = 0;

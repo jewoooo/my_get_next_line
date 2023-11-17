@@ -6,7 +6,7 @@
 /*   By: jewoolee <jewoolee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:29:11 by jewoolee          #+#    #+#             */
-/*   Updated: 2023/11/14 23:31:11 by jewoolee         ###   ########.fr       */
+/*   Updated: 2023/11/18 00:10:32 by jewoolee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ static char	*get_a_line(char **ptr)
 	if (line == NULL)
 	{
 		free(*ptr);
+		*ptr = NULL;
 		return (NULL);
 	}
 	line = gnl_strncpy(line, *ptr, size + 1);
@@ -95,7 +96,7 @@ char	*get_next_line(int fd)
 	char		*buff;
 	ssize_t		rd_size;
 
-	if (fd < 0 || BUFFER_SIZE < 1)
+	if (fd < 0 || fd == 2 || BUFFER_SIZE < 1)
 		return (NULL);
 	while (gnl_strnl(rd_line) == 0)
 	{
